@@ -1,1 +1,14 @@
 
+# 你的镜像将被推送到哪里
+image:
+  repository: "registry.cn-hangzhou.aliyuncs.com/ybl520/sre-app"
+  tag: "latest"
+
+# 简历高光点：本地 K3s 算力有限，强制资源降配，防止 Pending
+resources:
+  limits:
+    cpu: "1"      # 最高只给 1 核
+    memory: "2Gi" # 最高只给 2G 内存 (配合 /boom 接口，很快就能触发 OOM！)
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
