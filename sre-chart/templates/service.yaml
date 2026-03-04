@@ -8,6 +8,6 @@ spec:
     - port: 8080
       targetPort: 8080
       # 暴露出一个固定端口，方便我们后续做破坏性测试
-      nodePort: 30080
+      nodePort: 30082
   selector:
     app: {{ .Release.Name }}-app
