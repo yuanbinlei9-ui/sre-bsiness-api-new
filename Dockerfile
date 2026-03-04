@@ -1,7 +1,6 @@
 
 # 使用极其轻量的 Python 3.9 基础镜像
-FROM python:3.9-slim
-
+FROM swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/python:3.9-slim
 WORKDIR /app
 
 # 拷贝代码
