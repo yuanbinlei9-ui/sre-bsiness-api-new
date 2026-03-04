@@ -1,7 +1,7 @@
 
 # 你的镜像将被推送到哪里
 image:
-  repository: "registry.cn-hangzhou.aliyuncs.com/ybl520/sre-app"
+  repository: "https://crpi-vevxgzfyo5p9mdoo.cn-hangzhou.personal.cr.aliyuncs.com"
   tag: "latest"
 
 # 简历高光点：本地 K3s 算力有限，强制资源降配，防止 Pending
