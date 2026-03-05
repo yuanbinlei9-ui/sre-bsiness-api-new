@@ -30,11 +30,12 @@ def ai_advisor():
     }
     
     # 按照 Dify 官方文档规范组装 Payload
+  # 按照 Dify 官方文档规范组装 Payload
     payload = {
         "inputs": {}, 
         "query": f"作为SRE运维专家，请分析以下K8s报错并给出排查建议：{error_msg}",
-        "response_mode": "blocking", # 阻塞模式：等大模型全写完再返回
-        "conversation_id": "",
+        "response_mode": "blocking", # 阻塞模式
+        # ⚠️ 删除了 conversation_id，让 Dify 自动创建新会话
         "user": "sre-admin" 
     }
 
