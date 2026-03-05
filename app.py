@@ -1,13 +1,10 @@
 from flask import Flask, request, jsonify
 import requests
+import json  # 🌟 务必新增这个包，用来解析流式 JSON 数据
 
 app = Flask(__name__)
 
-# ==========================================
-# 🌟 Dify AIOps 中枢配置
-# ==========================================
 DIFY_API_URL = "https://api.dify.ai/v1/chat-messages"
-# 你的专属 API Key（已经加上了必要的 Bearer 前缀）
 DIFY_API_KEY = "Bearer app-yk25W03Hg3tKM4E9yw0YOKJi"
 
 @app.route('/')
@@ -18,7 +15,6 @@ def hello():
 def health_check():
     return "OK", 200
 
-# 🌟 核心功能：对接 Dify 的 AI 诊断接口
 @app.route('/api/v1/ai-advisor', methods=['POST'])
 def ai_advisor():
     data = request.json or {}
@@ -29,22 +25,31 @@ def ai_advisor():
         "Content-Type": "application/json"
     }
     
-    # 按照 Dify 官方文档规范组装 Payload
-  # 按照 Dify 官方文档规范组装 Payload
     payload = {
         "inputs": {}, 
         "query": f"作为SRE运维专家，请分析以下K8s报错并给出排查建议：{error_msg}",
-        "response_mode": "blocking", # 阻塞模式
-        # ⚠️ 删除了 conversation_id，让 Dify 自动创建新会话
+        "response_mode": "streaming", # 🌟 核心修改 1：顺应 Dify 的要求，改为流式模式
         "user": "sre-admin" 
     }
 
     try:
-        response = requests.post(DIFY_API_URL, headers=headers, json=payload)
+        # 🌟 核心修改 2：加上 stream=True，告诉 Python 我们要接收流式数据
+        response = requests.post(DIFY_API_URL, headers=headers, json=payload, stream=True)
         response.raise_for_status() 
         
-        dify_result = response.json()
-        ai_answer = dify_result.get('answer', 'AI思考被打断，未返回结果')
+        ai_answer = ""
+        # 🌟 核心修改 3：像 SRE 拼凑碎片一样，把大模型吐出的 SSE (Server-Sent Events) 数据流拼接起来
+        for line in response.iter_lines():
+            if line:
+                decoded_line = line.decode('utf-8')
+                if decoded_line.startswith('data: '):
+                    try:
+                        json_data = json.loads(decoded_line[6:])
+                        # 兼容基础聊天和 Agent 两种模式的返回体
+                        if json_data.get('event') in ['message', 'agent_message']:
+                            ai_answer += json_data.get('answer', '')
+                    except json.JSONDecodeError:
+                        continue
         
         return jsonify({
             "status": "success", 
@@ -55,7 +60,7 @@ def ai_advisor():
     except requests.exceptions.RequestException as e:
         return jsonify({
             "status": "error", 
-            "message": f"连接 Dify 智能中枢失败，请检查网络或 API Key。详细错误: {str(e)}"
+            "message": f"连接 Dify 失败: {str(e)}"
         }), 500
 
 if __name__ == '__main__':
