@@ -12,6 +12,9 @@ spec:
       labels:
         app: {{ .Release.Name }}-app
     spec:
+      # 🌟 新增：告诉 K8s 去哪里拿拉取镜像的钥匙
+      imagePullSecrets:
+        - name: aliyun-registry-secret
       containers:
         - name: app
           # 这里会自动读取你 values.yaml 里的阿里云 ACR 地址
