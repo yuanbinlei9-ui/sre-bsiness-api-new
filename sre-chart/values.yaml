@@ -2,7 +2,7 @@
 # 你的镜像将被推送到哪里
 image:
   repository: "https://crpi-vevxgzfyo5p9mdoo.cn-hangzhou.personal.cr.aliyuncs.com"
-  tag: "latest"
+  tag: "20260304052910-14-main"
 
 # 简历高光点：本地 K3s 算力有限，强制资源降配，防止 Pending
 resources:
