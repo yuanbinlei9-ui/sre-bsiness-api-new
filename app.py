@@ -103,7 +103,6 @@ HTML_TEMPLATE = """
 </html>
 """
 
-# 🌟 核心修改：将默认页面替换为你刚刚配置的高级 Web 看板！
 @app.route('/')
 def home():
     return HTML_TEMPLATE
@@ -112,11 +111,29 @@ def home():
 def health_check():
     return "OK", 200
 
-# （下面对接 Dify 的代码保持不变，依旧使用流式解析处理）
+# ==========================================
+# 🧠 核心 API：对接大模型，支持网页与监控告警双轨输入
+# ==========================================
 @app.route('/api/v1/ai-advisor', methods=['POST'])
 def ai_advisor():
     data = request.json or {}
-    error_msg = data.get('error_message', 'Pod处于CrashLoopBackOff状态')
+    
+    # 🌟 核心升级：AIOps 智能路由与格式自适应解析
+    if 'alerts' in data and len(data['alerts']) > 0:
+        # 路线 A：如果是 Prometheus Alertmanager 自动触发的 Webhook 告警
+        alert = data['alerts'][0] # 提取第一条核心告警
+        labels = alert.get('labels', {})
+        annotations = alert.get('annotations', {})
+        
+        alert_name = labels.get('alertname', '未知监控告警')
+        pod_name = labels.get('pod', '未知Pod')
+        description = annotations.get('description', annotations.get('message', '无详细描述'))
+        
+        # 组装成大模型能听懂的 SRE 报错日志
+        error_msg = f"监控系统触发告警 [{alert_name}]！影响的Pod为 [{pod_name}]。详细报错信息：{description}"
+    else:
+        # 路线 B：如果是人类工程师在前端控制台手动输入的排障日志
+        error_msg = data.get('error_message', 'Pod处于CrashLoopBackOff状态')
 
     headers = {
         "Authorization": DIFY_API_KEY,
